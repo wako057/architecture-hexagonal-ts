@@ -54,12 +54,12 @@ describe("Feature: Viewing a personnal timeline", () => {
                 {
                     author: "Alice",
                     text: "My second message, how are you all?",
-                    publicationTime: "4 min ago",
+                    publicationTime: "4 minutes ago",
                 },
                 {
                     author: "Alice",
                     text: "My first message",
-                    publicationTime: "6 min ago",
+                    publicationTime: "6 minutes ago",
                 },
             ]);
         });
@@ -76,10 +76,10 @@ describe("Feature: Viewing a personnal timeline", () => {
                 return "1 minute ago";
             }
 
-            return `${Math.floor(minutes)} minute ago`;
+            return `${Math.floor(minutes)} minutes ago`;
         };
 
-        describe.only("Publication Time", () => {
+        describe("Publication Time", () => {
             test("Should return 'less than a minute ago' when a publication date is inferior to one minute ago", () => {
                 const now = new Date("2024-10-07T12:01:30.000Z");
                 const publishedAt = new Date("2024-10-07T12:01:00.000Z");
@@ -110,15 +110,15 @@ describe("Feature: Viewing a personnal timeline", () => {
                 const publishedAt = new Date("2024-10-07T12:01:00.000Z");
                 const text = publicationTime(now, publishedAt);
 
-                expect(text).toEqual("2 minute ago");
+                expect(text).toEqual("2 minutes ago");
             })
 
-            test.only("Should return 'X minute ago' when a publication date is exactly superior to 1 minute ago", () => {
+            test("Should return 'X minute ago' when a publication date is exactly superior to 1 minute ago", () => {
                 const now = new Date("2024-10-07T12:04:01.000Z");
                 const publishedAt = new Date("2024-10-07T12:01:00.000Z");
                 const text = publicationTime(now, publishedAt);
 
-                expect(text).toEqual("3 minute ago");
+                expect(text).toEqual("3 minutes ago");
             })
 
         });

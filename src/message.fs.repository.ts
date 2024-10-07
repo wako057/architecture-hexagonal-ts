@@ -4,19 +4,41 @@ import { MessageRepository } from "./message.repository";
 import { Message } from "./message";
 
 export class FileSystemMessageRepository implements MessageRepository {
+    private readonly messagePath = path.join(__dirname, "message.json");
     message: Message;
 
-    save(message: Message): Promise<void> {
+    async save(message: Message): Promise<void> {
+        const messages = await this.getMessages();
+        messages.push(message);
+        console.log(messages, message);
         this.message = message;
         
+        
         return fs.promises.writeFile(
-            path.join(__dirname, "message.json"),
-            JSON.stringify(message) 
+            this.messagePath,
+            JSON.stringify(messages) 
         );
     }
-    
-    getAllOfUser(user: string): Promise<Message[]> {
-        throw new Error("Method not implemented.");
+
+    public async getMessages(): Promise<Message[]> {
+        const data = await fs.promises.readFile(this.messagePath);
+        const message = JSON.parse(data.toString()) as {
+            id: string,
+            text: string,
+            author: string,
+            publishedAt: string
+        }[];   
+
+        return message.map(m => ({
+            id: m.id,
+            text: m.text,
+            author: m.author,
+            publishedAt: new Date(m.publishedAt)
+        }));
     }
 
+    async getAllOfUser(user: string): Promise<Message[]> {
+        const messages = await this.getMessages();
+        return messages.filter(message => message.author === user);
+    }
 }

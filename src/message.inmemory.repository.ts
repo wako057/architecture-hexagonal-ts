@@ -23,7 +23,6 @@ export class InMemoryMessageRepository implements MessageRepository {
         return Promise.resolve(
             [...this.messages.values()]
             .filter(msg => msg.author === user)
-            // .reverse()
         );
     }
 

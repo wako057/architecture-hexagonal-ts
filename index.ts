@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Command } from "commander";
 import { DateProvider, PostMessageCommand, PostMessageUseCase } from "./src/post-message.usecase";
 import { InMemoryMessageRepository } from "./src/message.inmemory.repository";
@@ -46,18 +46,18 @@ program
     )
     .addCommand(
         new Command("view")
-        .argument("<user>", "The user to view the timeline of")
-        .action(async(user) => {
-            try {
-                const timeline = await viewTimelineUseCase.handle({user});
-                console.table(timeline);
-                process.exit(0);
-            } catch(err) {
-                console.error("❌", err);
-                process.exit(1);
-            }
-        })
-    ); 
+            .argument("<user>", "The user to view the timeline of")
+            .action(async (user) => {
+                try {
+                    const timeline = await viewTimelineUseCase.handle({ user });
+                    console.table(timeline);
+                    process.exit(0);
+                } catch (err) {
+                    console.error("❌", err);
+                    process.exit(1);
+                }
+            })
+    );
 
 async function main() {
     await program.parseAsync();

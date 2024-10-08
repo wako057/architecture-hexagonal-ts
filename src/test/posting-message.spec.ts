@@ -1,44 +1,38 @@
 import { EmptyMessageError, MessageTooLongError, PostMessageCommand, PostMessageUseCase } from "../post-message.usecase";
-import { InMemoryMessageRepository } from "../message.inmemory.repository";
-import { Message } from "../message";
-import { StubDateProvider } from "./stub-date-provider";
+import { messageBuilder } from "./message.builder";
+import { createMessagingFixture, MessagingFixture } from "./messaging.fixture";
 
 describe("Feature: Posting a message", () => {
-    let fixture: Fixture;
+    let fixture: MessagingFixture;
 
     beforeEach(() => {
-        fixture = createFixture();
+        fixture = createMessagingFixture();
     });
 
-    describe("Rule: A message can contain a maximum of 200 characters", () => {
+    describe("Rule: A message can contain a maximum of 280 characters", () => {
 
-        test.skip("Alice can post a message on a timeline", async () => {
-            fixture.givenNowIS(new Date("2023-01-19T19:00:00.000Z"));
+        test("Alice can post a message on a timeline", async () => {
+            fixture.givenNowIs(new Date("2023-01-19T19:00:00.000Z"));
 
-            await fixture.whenUserPostMessage({
-                id: "message-id",
-                text: "Hello World",
-                author: "Alice"
-            })
+            const aliceMessagebuilder = messageBuilder()
+                .withId("message-id")
+                .withText("Hello World")
+                .authoredBy("Alice")
+                .withDate(new Date("2023-01-19T19:00:00.000Z"));
 
-            await fixture.thenPostedMessageShouldBe({
-                id: "message-id",
-                text: "Hello World",
-                author: "Alice",
-                publishedAt: new Date("2023-01-19T19:00:00.000Z")
-            })
+            await fixture.whenUserPostMessage(aliceMessagebuilder.build())
+
+            await fixture.thenMessageShouldBe(aliceMessagebuilder.build())
         });
 
         test("Alice cannot post a message with more than 280 characters", async () => {
             const textWithLengthOf281 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque nisl ipsum,  condimentum ut euismod et, volutpat non mauris. Morbi congue, urna semper pretium congue, tortor augue finibus lorem, ut aliquet ante ex at ligula. Maecenas bibendum diam vitae felis rutrum placerat.";
 
-            await fixture.givenNowIS(new Date("2023-01-19T19:00:00.000Z"));
+            await fixture.givenNowIs(new Date("2023-01-19T19:00:00.000Z"));
 
-            await fixture.whenUserPostMessage({
-                id: "message-id",
-                text: textWithLengthOf281,
-                author: "Alice"
-            });
+            await fixture.whenUserPostMessage(
+                messageBuilder().withId("message-id").withText(textWithLengthOf281).authoredBy("Alice").build()
+            );
 
             await fixture.thenErrorShouldBe(MessageTooLongError);
 
@@ -48,62 +42,24 @@ describe("Feature: Posting a message", () => {
     describe("Rule: A message cannot be empty", () => {
 
         test("Alice cannot post an empty message", async () => {
-            await fixture.givenNowIS(new Date("2023-01-19T19:00:00.000Z"));
+            await fixture.givenNowIs(new Date("2023-01-19T19:00:00.000Z"));
 
-            await fixture.whenUserPostMessage({
-                id: "message-id",
-                text: "",
-                author: "Alice"
-            });
+            await fixture.whenUserPostMessage(
+                messageBuilder().withId("message-id").withText("").authoredBy("Alice").build()
+            );
 
             await fixture.thenErrorShouldBe(EmptyMessageError);
         });
 
         test("Alice cannot post a message with only whitespace", async () => {
-            await fixture.givenNowIS(new Date("2023-01-19T19:00:00.000Z"));
+            await fixture.givenNowIs(new Date("2023-01-19T19:00:00.000Z"));
 
-            await fixture.whenUserPostMessage({
-                id: "message-id",
-                text: "     ",
-                author: "Alice"
-            });
+            await fixture.whenUserPostMessage(
+                messageBuilder().withId("message-id").withText("     ").authoredBy("Alice").build()
+            );
 
             await fixture.thenErrorShouldBe(EmptyMessageError);
         });
 
     });
 });
-
-
-
-
-const createFixture = () => {
-    const dateProvider = new StubDateProvider();
-    const messageRepository = new InMemoryMessageRepository();
-    const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);
-    let thrownError: Error;
-    let message: Message;
-
-
-    return {
-        givenNowIS(now: Date) {
-            dateProvider.now = now;
-        },
-        async whenUserPostMessage(postMessageCommand: PostMessageCommand) {
-            try {
-                await postMessageUseCase.handle(postMessageCommand);
-            } catch (err) {
-                thrownError = err;
-            }
-        },
-        thenPostedMessageShouldBe(expectedMessage: Message) {
-            expect(expectedMessage)
-                .toEqual(messageRepository.getMessageById(message.id));
-        },
-        thenErrorShouldBe(expectedErrorClass: new () => Error) {
-            expect(thrownError).toBeInstanceOf(expectedErrorClass);
-        }
-    };
-}
-
-type Fixture = ReturnType<typeof createFixture>;

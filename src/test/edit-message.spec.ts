@@ -1,7 +1,6 @@
-import { text } from "stream/consumers";
 import { createMessagingFixture, MessagingFixture } from "./messaging.fixture";
 import { messageBuilder } from "./message.builder";
-import { EmptyMessageError, MessageTooLongError } from "../post-message.usecase";
+import { EmptyMessageError, MessageTooLongError } from "../message";
 
 describe("Feature: editing a message", () => {
     let fixture: MessagingFixture;

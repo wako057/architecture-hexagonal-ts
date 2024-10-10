@@ -1,5 +1,5 @@
 import { build } from "esbuild";
-import { Message } from "../message"
+import { Message, MessageText } from "../message"
 import { v4 as uuidv4 } from 'uuid';
 
 export const messageBuilder = ({
@@ -50,7 +50,7 @@ export const messageBuilder = ({
             return {
                 id: props.id,
                 author: props.author,
-                text: props.text,
+                text: MessageText.of(props.text),
                 publishedAt: props.publishedAt
             };
         }

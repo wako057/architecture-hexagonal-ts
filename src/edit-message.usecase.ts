@@ -13,11 +13,8 @@ export class EditMessageUseCase {
 
         const message = await this.messageRepository.getById(editMessageCommand.messageId);
 
-        const editedMessage = Message.fromData({
-            ...message.data,
-            text: editMessageCommand.text
-        });
+        message.editText(editMessageCommand.text);
         
-        await this.messageRepository.save(editedMessage);
+        await this.messageRepository.save(message);
     }
 }

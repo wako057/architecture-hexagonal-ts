@@ -42,6 +42,10 @@ export class Message {
         };
     }
 
+    editText(text: string) {
+        this._text = MessageText.of(text);
+    }
+
     static fromData(data: Message['data']) {
          return new Message(
             data.id,

@@ -1,13 +1,11 @@
-import { EmptyMessageError, MessageText, MessageTooLongError } from "./message";
+import { Message } from "./message";
 import { MessageRepository } from "./message.repository";
-
 
 export type PostMessageCommand = {
     id: string,
     text: string,
     author: string
 }
-
 
 export interface DateProvider{
     getNow(): Date
@@ -21,13 +19,11 @@ export class PostMessageUseCase {
 
     async handle(postMessageCommand: PostMessageCommand) {
         
-        const messageText = MessageText.of(postMessageCommand.text);
-
-        await this.saveMessage.save({
+        await this.saveMessage.save(Message.fromData({
             id: postMessageCommand.id,
-            text: messageText,
+            text: postMessageCommand.text,
             author: postMessageCommand.author,
             publishedAt: this.dateProvider.getNow()
-        });
+        }));
     }
 }

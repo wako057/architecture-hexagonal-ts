@@ -22,12 +22,7 @@ export class FileSystemMessageRepository implements MessageRepository {
         return fs.promises.writeFile(
             this.messagePath,
             JSON.stringify(
-                messages.map(m => ({
-                    id: m.id,
-                    author: m.author,
-                    publishedAt: m.publishedAt,
-                    text: m.text.value
-                }))
+                messages.map(m => m.data)
             )
         );
     }
@@ -40,19 +35,25 @@ export class FileSystemMessageRepository implements MessageRepository {
 
     public async getMessages(): Promise<Message[]> {
         const data = await fs.promises.readFile(this.messagePath);
-        const message = JSON.parse(data.toString()) as {
+        const messages = JSON.parse(data.toString()) as {
             id: string,
             text: string,
             author: string,
             publishedAt: string
         }[];
 
-        return message.map(m => ({
-            id: m.id,
-            text: MessageText.of(m.text),
-            author: m.author,
-            publishedAt: new Date(m.publishedAt)
+        return messages.map(msg => Message.fromData({
+            id: msg.id,
+            author: msg.author,
+            text: msg.text,
+            publishedAt: new Date(msg.publishedAt)
         }));
+        // return message.map(m => ({
+        //     id: m.id,
+        //     text: MessageText.of(m.text),
+        //     author: m.author,
+        //     publishedAt: new Date(m.publishedAt)
+        // }));
     }
 
     async getAllOfUser(user: string): Promise<Message[]> {

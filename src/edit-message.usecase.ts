@@ -1,4 +1,4 @@
-import { EmptyMessageError, MessageText, MessageTooLongError } from "./message";
+import { Message } from "./message";
 import { MessageRepository } from "./message.repository"
 
 export type EditMessageCommand = {
@@ -11,14 +11,12 @@ export class EditMessageUseCase {
 
     async handle(editMessageCommand: EditMessageCommand) {
 
-        const messageText = MessageText.of(editMessageCommand.text);
-
         const message = await this.messageRepository.getById(editMessageCommand.messageId);
 
-        const editedMessage = {
-            ...message,
-            text: messageText
-        }
+        const editedMessage = Message.fromData({
+            ...message.data,
+            text: editMessageCommand.text
+        });
         
         await this.messageRepository.save(editedMessage);
     }

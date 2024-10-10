@@ -27,12 +27,12 @@ export class InMemoryMessageRepository implements MessageRepository {
         return Promise.resolve(
             [...this.messages.values()]
                 .filter(msg => msg.author === user)
-                .map(m => ({
+                .map(m => (Message.fromData({
                     id: m.id,
                     text: m.text,
                     author: m.author,
                     publishedAt: m.publishedAt
-                }))
+                })))
         );
     }
 

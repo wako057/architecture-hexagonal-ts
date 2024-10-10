@@ -10,8 +10,12 @@ export class InMemoryMessageRepository implements MessageRepository {
         return Promise.resolve();
     }
 
+    getById(messageId: string): Promise<Message> {
+        return Promise.resolve(this.getMessageById(messageId));
+    }
+
     getMessageById(messageId: string) {
-        return this.messages.get(messageId);
+        return this.messages.get(messageId)!;
     }
 
     givenExistingMessages(messages: Message[]) {
@@ -22,7 +26,13 @@ export class InMemoryMessageRepository implements MessageRepository {
     getAllOfUser(user: string): Promise<Message[]> {
         return Promise.resolve(
             [...this.messages.values()]
-            .filter(msg => msg.author === user)
+                .filter(msg => msg.author === user)
+                .map(m => ({
+                    id: m.id,
+                    text: m.text,
+                    author: m.author,
+                    publishedAt: m.publishedAt
+                }))
         );
     }
 

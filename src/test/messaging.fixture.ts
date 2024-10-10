@@ -1,3 +1,4 @@
+import { EditMessageCommand, EditMessageUseCase } from "../edit-message.usecase";
 import { Message } from "../message";
 import { InMemoryMessageRepository } from "../message.inmemory.repository";
 import { MessageTimeline } from "../messageTimeline";
@@ -11,19 +12,10 @@ export const createMessagingFixture = () => {
     const messageRepository = new InMemoryMessageRepository();
     const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);
     const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository, dateProvider);
+    const editMessageUseCase = new EditMessageUseCase(messageRepository);
     let thrownError: Error;
-    let message: Message;
 
     return {
-        async whenUserEditMessage(editMessageCommand: { messageId: string, text: string }) {
-            
-         },
-        async whenUserSeesTheTimelineOf(user: string) {
-            timeline = await viewTimelineUseCase.handle({ user });
-        },
-        thenUserShouldSee(expectedTimeline: MessageTimeline[]) {
-            expect(timeline).toEqual(expectedTimeline);
-        },
         givenTheFollowingMessagesExist(messages: Message[]) {
             messageRepository.givenExistingMessages(messages);
         },
@@ -38,13 +30,27 @@ export const createMessagingFixture = () => {
                 thrownError = err;
             }
         },
-        thenMessageShouldBe(expectedMessage: Message) {
-            expect(expectedMessage)
-                .toEqual(messageRepository.getMessageById(this.message.id));
+        async whenUserEditMessage(editMessageCommand: EditMessageCommand) {
+            try {
+                await editMessageUseCase.handle(editMessageCommand);
+            } catch (err) {
+                thrownError = err;
+            }
+        },
+        async whenUserSeesTheTimelineOf(user: string) {
+            timeline = await viewTimelineUseCase.handle({ user });
+        },
+        thenUserShouldSee(expectedTimeline: MessageTimeline[]) {
+            expect(timeline).toEqual(expectedTimeline);
+        },
+        async thenMessageShouldBe(expectedMessage: Message) {
+            const message = await messageRepository.getById(expectedMessage.id);
+
+            expect(message).toEqual(expectedMessage);
         },
         thenErrorShouldBe(expectedErrorClass: new () => Error) {
             expect(thrownError).toBeInstanceOf(expectedErrorClass);
-        }
+        },
     };
 };
 

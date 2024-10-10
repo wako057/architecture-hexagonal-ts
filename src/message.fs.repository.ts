@@ -5,19 +5,29 @@ import { Message } from "./message";
 
 export class FileSystemMessageRepository implements MessageRepository {
     private readonly messagePath = path.join(__dirname, "message.json");
-    message: Message;
 
     async save(message: Message): Promise<void> {
         const messages = await this.getMessages();
-        messages.push(message);
-        console.log(messages, message);
-        this.message = message;
-        
-        
+
+        const existingMessageIndex = messages.findIndex(msg => msg.id === message.id);
+
+        if (existingMessageIndex === -1) {
+            console
+            messages.push(message);
+        } else {
+            messages[existingMessageIndex] = message;
+        }
+
         return fs.promises.writeFile(
             this.messagePath,
             JSON.stringify(messages) 
         );
+    }
+
+    async getById(messageId: string): Promise<Message> {
+        const allMessages = await this.getMessages();
+
+        return allMessages.filter(msg => msg.id === messageId)[0];
     }
 
     public async getMessages(): Promise<Message[]> {

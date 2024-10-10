@@ -1,6 +1,6 @@
 import { createMessagingFixture, MessagingFixture } from "./messaging.fixture";
 import { messageBuilder } from "./message.builder";
-import { EmptyMessageError, MessageTooLongError } from "../message";
+import { EmptyMessageError, MessageTooLongError } from "../domain/message";
 
 describe("Feature: editing a message", () => {
     let fixture: MessagingFixture;
@@ -90,28 +90,3 @@ describe("Feature: editing a message", () => {
         });
     });
 });
-
-// messageBuilder()
-// .withId("message-id")
-// .authoredBy("Alice")
-// .withText("Hello Wrld")
-// .build()
-// messageBuilder(
-// {
-//     id: "message-id",
-//     author: "Alice",
-//     text: "Hello Wrld",
-// }),
-
-// messageBuilder()
-//     .withId("message-id")
-//     .authoredBy("Alice")
-//     .withText("Hello World")
-//     .build()
-
-// messageBuilder(
-//     {
-//         id: "message-id",
-//         author: "Alice",
-//         text: "Hello World",
-//     })

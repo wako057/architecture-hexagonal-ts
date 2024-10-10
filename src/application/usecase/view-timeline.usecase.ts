@@ -1,6 +1,6 @@
-import { MessageRepository } from "./message.repository";
-import { MessageTimeline } from "./messageTimeline";
-import { DateProvider } from "./post-message.usecase";
+import { MessageRepository } from "../message.repository";
+import { MessageTimeline } from "../../messageTimeline";
+import { DateProvider } from "../date-provider";
 
 const ONE_MINUTE_INE_MILLISECOND = 60000;
 export class ViewTimelineUseCase {

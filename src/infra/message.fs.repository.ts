@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
-import { MessageRepository } from "./message.repository";
-import { Message, MessageText } from "./message";
+import { MessageRepository } from "../application/message.repository";
+import { Message } from "../domain/message";
 
 export class FileSystemMessageRepository implements MessageRepository {
     constructor(
@@ -48,12 +48,6 @@ export class FileSystemMessageRepository implements MessageRepository {
             text: msg.text,
             publishedAt: new Date(msg.publishedAt)
         }));
-        // return message.map(m => ({
-        //     id: m.id,
-        //     text: MessageText.of(m.text),
-        //     author: m.author,
-        //     publishedAt: new Date(m.publishedAt)
-        // }));
     }
 
     async getAllOfUser(user: string): Promise<Message[]> {

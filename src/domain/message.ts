@@ -2,18 +2,11 @@
 export class MessageTooLongError extends Error { };
 export class EmptyMessageError extends Error { };
 
-// export type Message = {
-//     id: string,
-//     text: MessageText,
-//     author: string,
-//     publishedAt: Date
-// };
-
 export class Message {
     constructor(
         private readonly _id: string,
         private readonly _author: string,
-        private readonly _text: MessageText,
+        private _text: MessageText,
         private readonly _publishedAt: Date
     ) { }
 

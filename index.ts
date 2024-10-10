@@ -2,18 +2,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Command } from "commander";
-import { DateProvider, PostMessageCommand, PostMessageUseCase } from "./src/post-message.usecase";
-import { InMemoryMessageRepository } from "./src/message.inmemory.repository";
-import { FileSystemMessageRepository } from "./src/message.fs.repository";
-import { ViewTimelineUseCase } from './src/view-timeline.usecase';
-import { EditMessageCommand, EditMessageUseCase } from './src/edit-message.usecase';
+import { RealDateProvider } from './src/infra/real-date.provider';
+import { FileSystemMessageRepository } from './src/infra/message.fs.repository';
+import { PostMessageCommand, PostMessageUseCase } from './src/application/usecase/post-message.usecase';
+import { ViewTimelineUseCase } from './src/application/usecase/view-timeline.usecase';
+import { EditMessageCommand, EditMessageUseCase } from './src/application/usecase/edit-message.usecase';
 
 
-class RealDateProvider implements DateProvider {
-    getNow(): Date {
-        return new Date();
-    }
-}
+
 const dateProvider = new RealDateProvider();
 const messageRepository = new FileSystemMessageRepository();
 const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);

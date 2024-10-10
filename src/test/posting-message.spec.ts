@@ -12,7 +12,7 @@ describe("Feature: Posting a message", () => {
 
     describe("Rule: A message can contain a maximum of 280 characters", () => {
 
-        test.only("Alice can post a message on a timeline", async () => {
+        test("Alice can post a message on a timeline", async () => {
 
             fixture.givenNowIs(new Date("2023-01-19T19:00:00.000Z"));
 

@@ -1,10 +1,12 @@
 import * as path from "path";
 import * as fs from "fs";
 import { MessageRepository } from "./message.repository";
-import { Message } from "./message";
+import { Message, MessageText } from "./message";
 
 export class FileSystemMessageRepository implements MessageRepository {
-    private readonly messagePath = path.join(__dirname, "message.json");
+    constructor(
+        private readonly messagePath = path.join(__dirname, "message.json")
+    ) { }
 
     async save(message: Message): Promise<void> {
         const messages = await this.getMessages();
@@ -12,7 +14,6 @@ export class FileSystemMessageRepository implements MessageRepository {
         const existingMessageIndex = messages.findIndex(msg => msg.id === message.id);
 
         if (existingMessageIndex === -1) {
-            console
             messages.push(message);
         } else {
             messages[existingMessageIndex] = message;
@@ -20,7 +21,14 @@ export class FileSystemMessageRepository implements MessageRepository {
 
         return fs.promises.writeFile(
             this.messagePath,
-            JSON.stringify(messages) 
+            JSON.stringify(
+                messages.map(m => ({
+                    id: m.id,
+                    author: m.author,
+                    publishedAt: m.publishedAt,
+                    text: m.text.value
+                }))
+            )
         );
     }
 
@@ -37,11 +45,11 @@ export class FileSystemMessageRepository implements MessageRepository {
             text: string,
             author: string,
             publishedAt: string
-        }[];   
+        }[];
 
         return message.map(m => ({
             id: m.id,
-            text: m.text,
+            text: MessageText.of(m.text),
             author: m.author,
             publishedAt: new Date(m.publishedAt)
         }));

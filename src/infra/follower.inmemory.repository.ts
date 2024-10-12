@@ -11,7 +11,7 @@ export class InMemoryFollowerRepository implements FollowerRepository {
 
     save(user: string, follow: string): Promise<void> {
         const userExist = this.followers.get(user);
-
+console.log('boum');
         if (userExist) {
             this.followers.set(user, [...userExist, follow])
         } else {

@@ -10,7 +10,7 @@ export class FollowerUseCase {
     constructor(private readonly followerRepository: FollowerRepository) { }
 
     async handle(follow: FollowCommand) {
-
+console.log('FollowerUseCase');
         this.followerRepository.save(follow.user, follow.userToFollow);
         
     }

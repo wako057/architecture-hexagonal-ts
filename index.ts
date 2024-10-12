@@ -21,6 +21,8 @@ const editMessageUseCase = new EditMessageUseCase(messageRepository);
 const followerUseCase = new FollowerUseCase(followerRepository);
 const program = new Command();
 
+
+
 program
     .version("1.0.0")
     .description("crafty social network")
@@ -77,27 +79,13 @@ program
                     userToFollow: followee
                 };
                 try {
-
                     await followerUseCase.handle(followCommand);
+                    console.log("✅ Followee ajouté");
                     process.exit(0);
                 } catch (err) {
                     console.error("❌", err);
                     process.exit(1);
                 }
-                // const editMessageCommand: EditMessageCommand = {
-                //     messageId : messageId,
-                //     text: message
-                // }
-
-                // try {
-                //     await editMessageUseCase.handle(editMessageCommand);
-                //     console.log("✅ Message edité");
-                //     console.table(await messageRepository.getMessages());
-                //     process.exit(0);
-                // } catch (err) {
-                //     console.error("❌", err);
-                //     process.exit(1);
-                // }
             })
     )
     .addCommand(
@@ -119,4 +107,12 @@ async function main() {
     await program.parseAsync();
 }
 
+
+process.on('uncaughtException', (err) => {
+    console.error('Unhandled Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 main();

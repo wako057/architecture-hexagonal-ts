@@ -7,14 +7,18 @@ import { FileSystemMessageRepository } from './src/infra/message.fs.repository';
 import { PostMessageCommand, PostMessageUseCase } from './src/application/usecase/post-message.usecase';
 import { ViewTimelineUseCase } from './src/application/usecase/view-timeline.usecase';
 import { EditMessageCommand, EditMessageUseCase } from './src/application/usecase/edit-message.usecase';
+import { FollowCommand, FollowerUseCase } from './src/application/usecase/follower.usecase';
+import { FileSystemFollowerRepository } from './src/infra/follower.fs.repository';
 
 
 
 const dateProvider = new RealDateProvider();
 const messageRepository = new FileSystemMessageRepository();
+const followerRepository = new FileSystemFollowerRepository();
 const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);
 const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository, dateProvider);
 const editMessageUseCase = new EditMessageUseCase(messageRepository);
+const followerUseCase = new FollowerUseCase(followerRepository);
 const program = new Command();
 
 program
@@ -48,7 +52,7 @@ program
             .argument("<message>", "The New Text")
             .action(async (messageId, message) => {
                 const editMessageCommand: EditMessageCommand = {
-                    messageId : messageId,
+                    messageId: messageId,
                     text: message
                 }
 
@@ -61,6 +65,39 @@ program
                     console.error("❌", err);
                     process.exit(1);
                 }
+            })
+    )
+    .addCommand(
+        new Command("follow")
+            .argument("<user>", "The User")
+            .argument("<followee>", "The personn to follow")
+            .action(async (user, followee) => {
+                const followCommand: FollowCommand = {
+                    user: user,
+                    userToFollow: followee
+                };
+                try {
+
+                    await followerUseCase.handle(followCommand);
+                    process.exit(0);
+                } catch (err) {
+                    console.error("❌", err);
+                    process.exit(1);
+                }
+                // const editMessageCommand: EditMessageCommand = {
+                //     messageId : messageId,
+                //     text: message
+                // }
+
+                // try {
+                //     await editMessageUseCase.handle(editMessageCommand);
+                //     console.log("✅ Message edité");
+                //     console.table(await messageRepository.getMessages());
+                //     process.exit(0);
+                // } catch (err) {
+                //     console.error("❌", err);
+                //     process.exit(1);
+                // }
             })
     )
     .addCommand(

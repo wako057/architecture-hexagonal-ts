@@ -99,7 +99,8 @@ program
                 };
                 try {
                     const wall = await wallUseCase.handle(wallCommand);
-                    console.log("✅ Followee ajouté");
+                    console.table(wall);
+                    console.log("✅ Wall affiché");
                     process.exit(0);
                 } catch (err) {
                     console.error("❌", err);

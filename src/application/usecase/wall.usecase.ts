@@ -12,8 +12,8 @@ export class WallUseCase {
         private readonly messageRepository: MessageRepository,
         private readonly followerRepository: FollowerRepository
     ) { }
-    async handle(user: string): Promise<Message[]> {
-        const userFollowee = await this.followerRepository.getUser(user);
+    async handle(wallCommand: WallCommand): Promise<Message[]> {
+        const userFollowee = await this.followerRepository.getUser(wallCommand.user);
 
         const messages = await Promise.all(userFollowee.map(f => this.messageRepository.getAllOfUser(f)));
 

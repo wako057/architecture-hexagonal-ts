@@ -16,7 +16,7 @@ export const createFollowingFixture = () => {
             user: string,
             messages: { author: string, message: string }[]
         }) {
-            const wall = await wallUseCase.handle(user);
+            const wall = await wallUseCase.handle({user});
             const toBeChecked = wall.map(msg => ({ author: msg.author, message: msg.text}));
             expect(toBeChecked).toEqual(messages);
         },

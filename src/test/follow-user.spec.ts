@@ -1,11 +1,10 @@
-import { FollowerUseCase } from "../application/usecase/follower.usecase";
-import { InMemoryFollowerRepository } from "../infra/follower.inmemory.repository";
+import { createFollowingFixture, FollowingFixture } from "./following.fixture";
 
 describe("Feature: Following a user", () => {
-    let fixture: Fixture;
+    let fixture: FollowingFixture;
 
     beforeEach(() => {
-        fixture = createFixture();
+        fixture = createFollowingFixture();
     });
 
     test("Alice can follow Bob", async () => {
@@ -26,32 +25,3 @@ describe("Feature: Following a user", () => {
         })
     })
 })
-
-
-const createFixture = () => {
-    const followersRepository = new InMemoryFollowerRepository();
-    const followerUseCase = new FollowerUseCase(followersRepository);
-
-    return {
-        givenUseFollowees({ user, followees }: { user: string, followees: string[] }) {
-            followersRepository.givenExistingFollowees(user, followees);
-
-         },
-        async whenUserFollows(followCommand: { user: string, userToFollow: string }) {
-            await followerUseCase.handle(followCommand)
-         },
-        async thenUserFolloweesAre({ user, followees }: { user: string, followees: string[] }) { 
-            const following = await followersRepository.getUser(user);
-
-            console.log('voici la liste', following);
-            console.table( following.map(m => ({[user]: m})));
-
-            expect(following.length).toEqual(followees.length)
-            expect(following).toEqual(
-                expect.arrayContaining(followees)
-            );
-        }
-    }
-}
-
-type Fixture = ReturnType<typeof createFixture>

@@ -1,8 +1,12 @@
+import { FollowUserCommand, FollowUserUseCase } from "../application/usecase/follow-user.usecase";
+import { InMemoryFolloweeRepository } from "../infra/followee.inmemory.repository";
+import { createFollowingFixture, FollowingFixture } from "./following.fixture";
+
 describe("Feature: Following a user", () => {
-    let fixture: Fixture;
+    let fixture: FollowingFixture;
 
     beforeEach(() => {
-        fixture = createFixture();
+        fixture = createFollowingFixture();
     });
 
     test("Alice can follow Bob", async () => {
@@ -23,14 +27,3 @@ describe("Feature: Following a user", () => {
         })
     })
 })
-
-
-const createFixture = () => {
-    return {
-        givenUseFollowees({ user, followees }: { user: string, followees: string[] }) { },
-        whenUserFollows(followCommand: { user: string, userToFollow: string }) { },
-        thenUserFolloweesAre({ user, followees }: { user: string, followees: string[] }) { }
-    }
-}
-
-type Fixture = ReturnType<typeof createFixture>

@@ -1,0 +1,16 @@
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"  
+    environment:
+      POSTGRES_USER: gregs
+      POSTGRES_PASSWORD: gregspasswd
+      POSTGRES_DB: crafty
+    volumes:
+      - db-data-crafty:/var/lib/postgresql/data/
+
+
+volumes:
+  db-data-crafty:

@@ -5,7 +5,6 @@ import { MessageTimeline } from "../messageTimeline";
 import { PostMessageCommand, PostMessageUseCase } from "../application/usecase/post-message.usecase";
 import { ViewTimelineUseCase } from "../application/usecase/view-timeline.usecase";
 import { StubDateProvider } from "../infra/stub-date-provider";
-import { MessageRepository } from "../application/message.repository";
 
 export const createMessagingFixture = () => {
     let timeline: MessageTimeline[];
@@ -17,9 +16,6 @@ export const createMessagingFixture = () => {
     let thrownError: Error;
 
     return {
-        getRepository(): MessageRepository {
-            return messageRepository;
-        },
         givenTheFollowingMessagesExist(messages: Message[]) {
             messageRepository.givenExistingMessages(messages);
         },

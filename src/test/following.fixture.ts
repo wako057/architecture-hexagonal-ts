@@ -1,28 +1,27 @@
 import { MessageRepository } from "../application/message.repository";
 import { FollowerUseCase } from "../application/usecase/follower.usecase";
+import { WallUseCase } from "../application/usecase/wall.usecase";
+import { Message } from "../domain/message";
 import { InMemoryFollowerRepository } from "../infra/follower.inmemory.repository";
+import { InMemoryMessageRepository } from "../infra/message.inmemory.repository";
 
 export const createFollowingFixture = () => {
     const followersRepository = new InMemoryFollowerRepository();
+    const messageRepository = new InMemoryMessageRepository();
     const followerUseCase = new FollowerUseCase(followersRepository);
+    const wallUseCase = new WallUseCase(messageRepository, followersRepository);
 
     return {
-        async thenUsersWallShouldBe({ user, followee, messages, messagingRepository }: {
+        async thenUsersWallShouldBe({ user, messages }: {
             user: string,
-            followee: string,
-            messages: { author: string, message: string }[],
-            messagingRepository: MessageRepository
+            messages: { author: string, message: string }[]
         }) {
-            const follow = await followersRepository.getUser(user);
-            const messagesChk = await Promise.all(follow.flatMap((f) => messagingRepository.getAllOfUser(f)));
-            const messageChkFlatOrdered = messagesChk
-                .flat()
-                .sort((msgA, msgB) => msgB.publishedAt.getTime() - msgA.publishedAt.getTime())
-                .map(msg => ({ author: msg.author, message: msg.text}));
-
-            expect(messageChkFlatOrdered).toEqual(
-                messages
-            );
+            const wall = await wallUseCase.handle(user);
+            const toBeChecked = wall.map(msg => ({ author: msg.author, message: msg.text}));
+            expect(toBeChecked).toEqual(messages);
+        },
+        givenTheFollowingMessagesExist(messages: Message[]) {
+            messageRepository.givenExistingMessages(messages);
         },
         givenUseFollowees({ user, followees }: { user: string, followees: string[] }) {
             followersRepository.givenExistingFollowees(user, followees);

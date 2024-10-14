@@ -9,6 +9,7 @@ import { ViewTimelineUseCase } from './src/application/usecase/view-timeline.use
 import { EditMessageCommand, EditMessageUseCase } from './src/application/usecase/edit-message.usecase';
 import { FollowCommand, FollowerUseCase } from './src/application/usecase/follower.usecase';
 import { FileSystemFollowerRepository } from './src/infra/follower.fs.repository';
+import { WallCommand, WallUseCase } from './src/application/usecase/wall.usecase';
 
 
 
@@ -19,6 +20,7 @@ const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvide
 const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository, dateProvider);
 const editMessageUseCase = new EditMessageUseCase(messageRepository);
 const followerUseCase = new FollowerUseCase(followerRepository);
+const wallUseCase = new WallUseCase(messageRepository, followerRepository);
 const program = new Command();
 
 
@@ -89,6 +91,23 @@ program
             })
     )
     .addCommand(
+        new Command("wall")
+            .argument("<user>", "The Users' Wall")
+            .action(async (user) => {
+                const wallCommand: WallCommand = {
+                    user: user,
+                };
+                try {
+                    const wall = await wallUseCase.handle(wallCommand);
+                    console.log("✅ Followee ajouté");
+                    process.exit(0);
+                } catch (err) {
+                    console.error("❌", err);
+                    process.exit(1);
+                }
+            })
+    )
+        .addCommand(
         new Command("view")
             .argument("<user>", "The user to view the timeline of")
             .action(async (user) => {

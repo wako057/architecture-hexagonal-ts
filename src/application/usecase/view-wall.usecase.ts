@@ -1,8 +1,7 @@
+import { Timeline } from "../../domain/timeline";
 import { DateProvider } from "../date-provider";
 import { FolloweeRepository } from "../followee.repository";
 import { MessageRepository } from "../message.repository";
-
-const ONE_MINUTE_INE_MILLISECOND = 60000;
 
 export class ViewWallUseCase {
     constructor(
@@ -17,28 +16,9 @@ export class ViewWallUseCase {
             [user, ...followees].map((user) => this.messageRepository.getAllOfUser(user))
         )).flat();
 
-        messages.sort((msgA, msgB) => msgB.publishedAt.getTime() - msgA.publishedAt.getTime());
+        const timeline = new Timeline(messages, this.dateProvider.getNow());
 
-        return messages.map((msg) => ({
-            author: msg.author,
-            text: msg.text,
-            publicationTime: this.publicationTime(msg.publishedAt)
-        }));
+        return timeline.data;
      }
 
-     private publicationTime = (publicationTime: Date) => {
-        const now = this.dateProvider.getNow();
-        const diff = now.getTime() - publicationTime.getTime();
-        const minutes = Math.floor(diff / ONE_MINUTE_INE_MILLISECOND);
-    
-        if (minutes < 1) {
-            return "less than a minute ago";
-        }
-    
-        if (minutes < 2) {
-            return "1 minute ago";
-        }
-    
-        return `${minutes} minutes ago`;
-    };
 }

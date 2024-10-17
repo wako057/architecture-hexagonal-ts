@@ -11,7 +11,9 @@ import { ViewWallUseCase } from '../application/usecase/view-wall.usecase';
 import { PrismaClient } from '@prisma/client';
 import { PrismaMessageRepository } from '../infra/message.prisma.repository';
 import { PrimaFolloweeRepository } from '../infra/followee.prisma.repository';
-import Fastify, { FastifyInstance,  } from 'fastify';
+import Fastify, { FastifyInstance, FastifyReply,  } from 'fastify';
+import { TimelinePresenter } from '../application/timeline-presenter';
+import { Timeline } from '../domain/timeline';
 
 const prismaClient = new PrismaClient();
 const dateProvider = new RealDateProvider();
@@ -20,8 +22,17 @@ const followeeRepository = new PrimaFolloweeRepository(prismaClient);
 const editMessageUseCase = new EditMessageUseCase(messageRepository);
 const followUserUseCase = new FollowUserUseCase(followeeRepository);
 const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);
-const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository, dateProvider);
-const viewWallUseCase = new ViewWallUseCase(messageRepository, followeeRepository, dateProvider);
+const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository);
+const viewWallUseCase = new ViewWallUseCase(messageRepository, followeeRepository);
+
+class ApiTimelinePresenter implements TimelinePresenter {
+    constructor(private readonly reply: FastifyReply) {}
+
+    show(timeline: Timeline): void {
+        this.reply.status(200).send(timeline.data);
+    }
+
+}
 
 const fastify = Fastify({ logger: true });
 
@@ -79,10 +90,14 @@ const routes = async (fastifyInstance: FastifyInstance) => {
         | { author: string; text: string; publicationTime: string }[]
         | httpErrors.httpError<500>;
     }>("/view", {}, async (request, reply) => {
+
+        const timelinePresenter = new ApiTimelinePresenter(reply);
         try {
-            const timeline = await viewTimelineUseCase.handle({ user: request.query.user });
-            reply.status(200).send(timeline);
-        } catch (err) {
+            await viewTimelineUseCase.handle(
+                { user: request.query.user },
+                timelinePresenter 
+            );
+        } catch (err) { 
             reply.send(httpErrors[500](err));
         }
     })
@@ -94,9 +109,12 @@ const routes = async (fastifyInstance: FastifyInstance) => {
         | httpErrors.httpError<500>;
     }>("/wall", {}, async (request, reply) => {
 
+        const timelinePresenter = new ApiTimelinePresenter(reply);
         try {
-            const timeline = await viewWallUseCase.handle(request.query.user);
-            reply.status(200).send(timeline);
+            await viewWallUseCase.handle(
+                {user:request.query.user},
+                timelinePresenter
+            );
         } catch (err) {
             reply.send(httpErrors[500](err));
         }

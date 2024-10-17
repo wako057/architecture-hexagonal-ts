@@ -12,7 +12,7 @@ export class FileSystemFolloweeRepository implements FolloweeRepository {
         actualUserFollowees.push(followee.followee);
         followees[followee.user] = actualUserFollowees
 
-        console.log(followees);
+        // console.log(followees);
         return fs.promises.writeFile(
             this.followeesPath,
             JSON.stringify(followees)

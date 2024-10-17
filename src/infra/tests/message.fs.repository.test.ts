@@ -2,8 +2,8 @@
 import * as path from "path";
 import * as fs from "fs";
 
-import { FileSystemMessageRepository } from "../infra/message.fs.repository";
-import { messageBuilder } from "./message.builder";
+import { FileSystemMessageRepository } from "../message.fs.repository";
+import { messageBuilder } from "../../test/message.builder";
 
 const testMessagePath = path.join(__dirname, "./messages-test.json");
 

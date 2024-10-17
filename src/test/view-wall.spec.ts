@@ -1,6 +1,8 @@
 import { FolloweeRepository } from "../application/followee.repository";
 import { MessageRepository } from "../application/message.repository";
+import { TimelinePresenter } from "../application/timeline-presenter";
 import { ViewWallUseCase } from "../application/usecase/view-wall.usecase";
+import { DefaultTimelinePresenter } from "../apps/timeline.default.presenter";
 import { StubDateProvider } from "../infra/stub-date-provider";
 import { createFollowingFixture, FollowingFixture } from "./following.fixture";
 import { messageBuilder } from "./message.builder";
@@ -18,7 +20,7 @@ describe("Feature: Viewing user wall", () => {
             messageRepository: messaginFixture.messageRepository,
             followeeRepository: followingFixture.followeeRepository,
         });
-     })
+    })
 
     describe("Rule: All the message from user and her followees should appear in reverse chronological order", () => {
 
@@ -53,10 +55,16 @@ describe("Feature: Viewing user wall", () => {
     })
 })
 
-const createFixture = ({messageRepository, followeeRepository}: {messageRepository: MessageRepository, followeeRepository: FolloweeRepository}) => {
-    let wall: {author: string, text: string, publicationTime: string}[];
+const createFixture = ({ messageRepository, followeeRepository }: { messageRepository: MessageRepository, followeeRepository: FolloweeRepository }) => {
+    let wall: { author: string, text: string, publicationTime: string }[];
     const dateProvider = new StubDateProvider();
-    const viewWallUserUserCase = new ViewWallUseCase(messageRepository, followeeRepository, dateProvider);
+    const viewWallUserUserCase = new ViewWallUseCase(messageRepository, followeeRepository);
+    const defaultWallPresenter = new DefaultTimelinePresenter(dateProvider);
+    const wallPresenter: TimelinePresenter = {
+        show(theTimeline) {
+            wall = defaultWallPresenter.show(theTimeline);
+        }
+    }
 
 
     return {
@@ -64,12 +72,12 @@ const createFixture = ({messageRepository, followeeRepository}: {messageReposito
             dateProvider.now = now;
         },
         async whenUserSeesTheWallOf(user: string) {
-            wall = await viewWallUserUserCase.handle(user);
+            await viewWallUserUserCase.handle({ user }, wallPresenter);
         },
-        thenUserShouldSee(expectedWall: {author: string, text: string, publicationTime: string}[]) {
+        thenUserShouldSee(expectedWall: { author: string, text: string, publicationTime: string }[]) {
             expect(wall).toEqual(expectedWall);
         },
     };
- };
+};
 
 type Fixture = ReturnType<typeof createFixture>;

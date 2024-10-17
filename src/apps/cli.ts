@@ -16,10 +16,10 @@ import { TimelinePresenter } from '../application/timeline-presenter';
 import { Timeline } from '../domain/timeline';
 
 class CliTimelinePresenter implements TimelinePresenter {
-    constructor(private readonly defaultTimelinePresenter: DefaultTimelinePresenter) {}
+    constructor(private readonly defaultTimelinePresenter: DefaultTimelinePresenter) { }
 
     show(timeline: Timeline): void {
-        console.table(this.defaultTimelinePresenter.show(timeline));  
+        console.table(this.defaultTimelinePresenter.show(timeline));
     }
 }
 const prismaClient = new PrismaClient();
@@ -27,7 +27,7 @@ const dateProvider = new RealDateProvider();
 const messageRepository = new PrismaMessageRepository(prismaClient);
 const followeeRepository = new PrimaFolloweeRepository(prismaClient);
 const editMessageUseCase = new EditMessageUseCase(messageRepository);
-const followUserUserCase = new FollowUserUseCase(followeeRepository); 
+const followUserUserCase = new FollowUserUseCase(followeeRepository);
 const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);
 const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository);
 const viewWallUseCase = new ViewWallUseCase(messageRepository, followeeRepository);
@@ -50,9 +50,13 @@ program
                 }
 
                 try {
-                    await postMessageUseCase.handle(postMessageCommand);
-                    console.log("✅ Message posté");
-                    process.exit(0);
+                    const result = await postMessageUseCase.handle(postMessageCommand);
+                    if (result.isOk()) {
+                        console.log("✅ Message posté");
+                        process.exit(0);
+                    }
+                    console.error("❌", result.error);
+                    process.exit(1);
                 } catch (err) {
                     console.error("❌", err);
                     process.exit(1);
@@ -65,14 +69,18 @@ program
             .argument("<message>", "The New Text")
             .action(async (messageId, message) => {
                 const editMessageCommand: EditMessageCommand = {
-                    messageId : messageId,
+                    messageId: messageId,
                     text: message
                 }
 
                 try {
-                    await editMessageUseCase.handle(editMessageCommand);
-                    console.log("✅ Message edité");
-                    process.exit(0);
+                    const result = await editMessageUseCase.handle(editMessageCommand);
+                    if (result.isOk()) {
+                        console.log("✅ Message edité");
+                        process.exit(0);
+                    }
+                    console.error("❌", result.error);
+                    process.exit(1);
                 } catch (err) {
                     console.error("❌", err);
                     process.exit(1);
@@ -84,7 +92,7 @@ program
             .argument("<user>", "The current user")
             .argument("<user-to-follow>", "The user to follow")
             .action(async (user, userToFollow) => {
-                const followUserCommand: FollowUserCommand  = {
+                const followUserCommand: FollowUserCommand = {
                     user,
                     userToFollow
                 };
@@ -118,7 +126,7 @@ program
             .argument("<user>", "The user to view the wall of")
             .action(async (user) => {
                 try {
-                    const timeline = await viewWallUseCase.handle({user}, timelinePresenter);
+                    const timeline = await viewWallUseCase.handle({ user }, timelinePresenter);
                     console.table(timeline);
                     process.exit(0);
                 } catch (err) {

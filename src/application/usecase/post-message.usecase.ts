@@ -1,6 +1,7 @@
-import { Message } from "../../domain/message";
+import { EmptyMessageError, Message, MessageTooLongError } from "../../domain/message";
 import { DateProvider } from "../date-provider";
 import { MessageRepository } from "../message.repository";
+import { Err, Ok, Result } from "../result";
 
 export type PostMessageCommand = {
     id: string,
@@ -10,17 +11,25 @@ export type PostMessageCommand = {
 
 export class PostMessageUseCase {
     constructor(
-        private readonly saveMessage: MessageRepository,
+        private readonly messageRepository: MessageRepository,
         private readonly dateProvider: DateProvider
-    ) {}
+    ) { }
 
-    async handle(postMessageCommand: PostMessageCommand) {
+    async handle(postMessageCommand: PostMessageCommand): Promise<Result<void, EmptyMessageError | MessageTooLongError>> {
+        let message: Message;
         
-        await this.saveMessage.save(Message.fromData({
-            id: postMessageCommand.id,
-            text: postMessageCommand.text,
-            author: postMessageCommand.author,
-            publishedAt: this.dateProvider.getNow()
-        }));
+        try {
+            message = Message.fromData({
+                id: postMessageCommand.id,
+                text: postMessageCommand.text,
+                author: postMessageCommand.author,
+                publishedAt: this.dateProvider.getNow()
+            });
+        } catch (err) {
+            return Err.of(err);
+        }
+        await this.messageRepository.save(message);
+
+        return Ok.of(undefined);
     }
 }

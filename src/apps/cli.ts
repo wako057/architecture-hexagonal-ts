@@ -2,24 +2,25 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Command } from "commander";
-import { RealDateProvider } from './src/infra/real-date.provider';
-import { FileSystemMessageRepository } from './src/infra/message.fs.repository';
-import { PostMessageCommand, PostMessageUseCase } from './src/application/usecase/post-message.usecase';
-import { ViewTimelineUseCase } from './src/application/usecase/view-timeline.usecase';
-import { EditMessageCommand, EditMessageUseCase } from './src/application/usecase/edit-message.usecase';
-import { FollowUserCommand, FollowUserUseCase } from './src/application/usecase/follow-user.usecase';
-import { FileSystemFolloweeRepository } from './src/infra/followee.fs.repository';
-import { ViewWallUseCase } from './src/application/usecase/view-wall.usecase';
+import { RealDateProvider } from '../infra/real-date.provider';
+import { PostMessageCommand, PostMessageUseCase } from '../application/usecase/post-message.usecase';
+import { ViewTimelineUseCase } from '../application/usecase/view-timeline.usecase';
+import { EditMessageCommand, EditMessageUseCase } from '../application/usecase/edit-message.usecase';
+import { FollowUserCommand, FollowUserUseCase } from '../application/usecase/follow-user.usecase';
+import { ViewWallUseCase } from '../application/usecase/view-wall.usecase';
+import { PrismaClient } from '@prisma/client';
+import { PrismaMessageRepository } from '../infra/message.prisma.repository';
+import { PrimaFolloweeRepository } from '../infra/followee.prisma.repository';
 
 
-
+const prismaClient = new PrismaClient();
 const dateProvider = new RealDateProvider();
-const messageRepository = new FileSystemMessageRepository();
+const messageRepository = new PrismaMessageRepository(prismaClient);
+const followeeRepository = new PrimaFolloweeRepository(prismaClient);
+const editMessageUseCase = new EditMessageUseCase(messageRepository);
+const followUserUserCase = new FollowUserUseCase(followeeRepository); 
 const postMessageUseCase = new PostMessageUseCase(messageRepository, dateProvider);
 const viewTimelineUseCase = new ViewTimelineUseCase(messageRepository, dateProvider);
-const editMessageUseCase = new EditMessageUseCase(messageRepository);
-const followeeRepository = new FileSystemFolloweeRepository();
-const followUserUserCase = new FollowUserUseCase(followeeRepository); 
 const viewWallUseCase = new ViewWallUseCase(messageRepository, followeeRepository, dateProvider);
 const program = new Command();
 
@@ -40,7 +41,6 @@ program
                 try {
                     await postMessageUseCase.handle(postMessageCommand);
                     console.log("✅ Message posté");
-                    console.table(await messageRepository.getMessages());
                     process.exit(0);
                 } catch (err) {
                     console.error("❌", err);
@@ -61,7 +61,6 @@ program
                 try {
                     await editMessageUseCase.handle(editMessageCommand);
                     console.log("✅ Message edité");
-                    console.table(await messageRepository.getMessages());
                     process.exit(0);
                 } catch (err) {
                     console.error("❌", err);
@@ -74,7 +73,7 @@ program
             .argument("<user>", "The current user")
             .argument("<user-to-follow>", "The user to follow")
             .action(async (user, userToFollow) => {
-                const followUserCommand: FollowUserCommand = {
+                const followUserCommand: FollowUserCommand  = {
                     user,
                     userToFollow
                 };
@@ -82,7 +81,6 @@ program
                 try {
                     await followUserUserCase.handle(followUserCommand);
                     console.log(`✅ Tu suis maintenant ${userToFollow}`);
-                    console.table(await messageRepository.getMessages());
                     process.exit(0);
                 } catch (err) {
                     console.error("❌", err);
@@ -120,7 +118,9 @@ program
     );
 
 async function main() {
+    await prismaClient.$connect();
     await program.parseAsync();
+    await prismaClient.$disconnect();
 }
 
 main();

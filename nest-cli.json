@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/architecture-hexagonal-ts/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/architecture-hexagonal-ts/tsconfig.app.json"
+  },
+  "projects": {
+    "crafty": {
+      "type": "library",
+      "root": "libs/crafty",
+      "entryFile": "index",
+      "sourceRoot": "libs/crafty/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/crafty/tsconfig.lib.json"
+      }
+    },
+    "architecture-hexagonal-ts": {
+      "type": "application",
+      "root": "apps/architecture-hexagonal-ts",
+      "entryFile": "main",
+      "sourceRoot": "apps/architecture-hexagonal-ts/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/architecture-hexagonal-ts/tsconfig.app.json"
+      }
+    },
+    "api": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "main",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json"
+      }
+    },
+    "cli": {
+      "type": "application",
+      "root": "apps/cli",
+      "entryFile": "main",
+      "sourceRoot": "apps/cli/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cli/tsconfig.app.json"
+      }
+    }
+  },
+  "monorepo": true,
+  "root": "apps/architecture-hexagonal-ts"
+}

@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { Timeline } from "../../domain/timeline";
 import { DateProvider } from "../date-provider";
 import { FolloweeRepository } from "../followee.repository";
@@ -5,7 +6,7 @@ import { MessageRepository } from "../message.repository";
 import { TimelinePresenter } from "../timeline-presenter";
 
 const ONE_MINUTE_INE_MILLISECOND = 60000;
-
+@Injectable()
 export class ViewWallUseCase {
     constructor(
         private readonly messageRepository: MessageRepository,

@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { MessageRepository } from "../application/message.repository";
 import { Message } from "../domain/message";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class PrismaMessageRepository implements MessageRepository {
     constructor(private readonly prisma: PrismaClient) { }
 

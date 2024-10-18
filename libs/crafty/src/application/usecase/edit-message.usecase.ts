@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { EmptyMessageError, MessageTooLongError } from "../../domain/message";
 import { MessageRepository } from "../message.repository"
 import { Err, Ok, Result } from "../result";
@@ -7,6 +8,7 @@ export type EditMessageCommand = {
     text: string
 }
 
+@Injectable()
 export class EditMessageUseCase {
     constructor(private readonly messageRepository: MessageRepository) { }
 

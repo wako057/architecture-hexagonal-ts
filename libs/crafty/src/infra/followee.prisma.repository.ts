@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { Followee, FolloweeRepository } from "../application/followee.repository";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class PrimaFolloweeRepository implements FolloweeRepository {
 
     constructor(private readonly prisma: PrismaClient) { }

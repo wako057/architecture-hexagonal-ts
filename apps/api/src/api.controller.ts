@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException, Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpException, HttpStatus, Post, Query, Res } from '@nestjs/common';
 import { PostMessageCommand, PostMessageUseCase } from '@crafty/crafty/application/usecase/post-message.usecase';
 import { EditMessageCommand, EditMessageUseCase } from '@crafty/crafty/application/usecase/edit-message.usecase';
 import { FollowUserCommand, FollowUserUseCase } from '@crafty/crafty/application/usecase/follow-user.usecase';
@@ -27,10 +27,10 @@ export class ApiController {
       text: body.message
     }
 
-    try {
-      const result = await this.postMessageUseCase.handle(postMessageCommand);
-    } catch (err) {
-      throw new BadRequestException(err);
+    const result = await this.postMessageUseCase.handle(postMessageCommand);
+
+    if (result.isErr()) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
   }
 
@@ -41,11 +41,13 @@ export class ApiController {
       text: body.message
     }
 
-    try {
-      await this.editMessageUseCase.handle(editMessageCommand);
-    } catch (err) {
-      throw new BadRequestException(err);
+    const result = await this.editMessageUseCase.handle(editMessageCommand);
+
+    if (result.isErr()) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      // throw new BadRequestException(result.error);
     }
+
   }
 
   @Post('follow')
@@ -65,5 +67,15 @@ export class ApiController {
   ) {
     const presenter = new ApiTimelinePresenter(response);
     await this.viewTimelineUseCase.handle(query, presenter);
+  }
+
+
+  @Get('wall')
+  async wallTimeline(
+    @Query() query: { user: string },
+    @Res() response: FastifyReply
+  ) {
+    const presenter = new ApiTimelinePresenter(response);
+    await this.viewWallUseCase.handle(query, presenter);
   }
 }

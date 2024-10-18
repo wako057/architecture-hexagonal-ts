@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { FolloweeRepository } from "../followee.repository";
 
 export type FollowUserCommand = {
@@ -5,7 +6,7 @@ export type FollowUserCommand = {
     userToFollow: string;
 };
 
-
+@Injectable()
 export class FollowUserUseCase {
     constructor(private readonly followeeRepository: FolloweeRepository) {}
 
